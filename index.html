@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Admission Calculator</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            perspective: 1000px;
+            padding: 20px 0; /* Added padding to ensure content is not cut off */
+            overflow-y: auto; /* Allow vertical scrolling */
+            overflow-x: hidden !important; /* Prevent horizontal scrolling */
+        }
+
+        .background-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .box {
+            position: absolute;
+            border: 2px solid rgba(253, 252, 252, 0.1);
+            animation: moveBox 20s infinite alternate;
+            transform-style: preserve-3d;
+        }
+
+        @keyframes moveBox {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg) translateZ(-100px);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translate(50%, 50%) rotate(180deg) translateZ(100px);
+                opacity: 0.9;
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg) translateZ(-100px);
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes gradientBG {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+
+        .form {
+            background-color: #15172b;
+            border-radius: 20px;
+            box-sizing: border-box;
+            padding: 30px;
+            width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-container img {
+            max-width: 200px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .logo-container img:hover {
+            transform: scale(1.05);
+        }
+
+        .title {
+            color: #eee;
+            font-family: 'Poppins', sans-serif;
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .input-container {
+            position: relative;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .input {
+            background-color: #303245;
+            border-radius: 12px;
+            border: 0;
+            box-sizing: border-box;
+            color: #eee;
+            font-size: 18px;
+            height: 50px;
+            outline: 0;
+            padding: 0 20px;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .input:focus {
+            box-shadow: 0 0 10px rgba(13, 202, 240, 0.5);
+        }
+
+        .placeholder {
+            color: #65657b;
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .input:focus + .placeholder,
+        .input:not(:placeholder-shown) + .placeholder {
+            top: -10px;
+            left: 10px;
+            font-size: 12px;
+            color: #0dcaf0;
+        }
+
+        .submit {
+            background-color: #0d6efd;
+            border-radius: 12px;
+            border: 0;
+            box-sizing: border-box;
+            color: #eee;
+            cursor: pointer;
+            font-size: 18px;
+            height: 50px;
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .submit:hover {
+            background-color: #0b5ed7;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .submit:active {
+            transform: translateY(1px);
+            box-shadow: none;
+        }
+
+        /* Loading Animation Styles */
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(21, 23, 43, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .loader {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            perspective: 800px;
+        }
+
+        .inner {
+            position: absolute;
+            box-sizing: border-box;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .inner.one {
+            left: 0%;
+            top: 0%;
+            animation: rotate-one 1s linear infinite;
+            border-bottom: 3px solid #0dcaf0;
+        }
+
+        .inner.two {
+            right: 0%;
+            top: 0%;
+            animation: rotate-two 1s linear infinite;
+            border-right: 3px solid #007bff;
+        }
+
+        .inner.three {
+            right: 0%;
+            bottom: 0%;
+            animation: rotate-three 1s linear infinite;
+            border-top: 3px solid #28a745;
+        }
+
+        @keyframes rotate-one {
+            0% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg); }
+            100% { transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg); }
+        }
+
+        @keyframes rotate-two {
+            0% { transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg); }
+            100% { transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg); }
+        }
+
+        @keyframes rotate-three {
+            0% { transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg); }
+            100% { transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader Overlay -->
+    <div class="loader-overlay" id="loaderOverlay">
+        <div class="loader">
+            <div class="inner one"></div>
+            <div class="inner two"></div>
+            <div class="inner three"></div>
+        </div>
+    </div>
+
+    <div class="background-shapes" id="backgroundShapes"></div>
+
+    <div class="form">
+        <div class="logo-container">
+            <img src="https://eruditecoachingcentre.com/wp-content/uploads/2024/08/ECC-LOGO-180x90.png" alt="Erudite Coaching Centre Logo">
+        </div>
+        <div class="title">University Admission Calculator</div>
+
+        <div class="input-container">
+            <input id="matricTotal" class="input" type="number" placeholder=" ">
+            <label for="matricTotal" class="placeholder">Matric Total Marks</label>
+        </div>
+
+        <div class="input-container">
+            <input id="matricObtained" class="input" type="number" placeholder=" ">
+            <label for="matricObtained" class="placeholder">Matric Obtained Marks</label>
+        </div>
+
+        <div class="input-container">
+            <input id="fscTotal" class="input" type="number" placeholder=" ">
+            <label for="fscTotal" class="placeholder">FSc Total Marks</label>
+        </div>
+
+        <div class="input-container">
+            <input id="fscObtained" class="input" type="number" placeholder=" ">
+            <label for="fscObtained" class="placeholder">FSc Obtained Marks</label>
+        </div>
+
+        <div class="input-container">
+            <select id="entryTestOption" class="input" onchange="toggleEntryTestInputs()">
+                <option value="yes" selected>Took Entry Test</option>
+                <option value="no">Did Not Take Entry Test</option>
+            </select>
+            <label for="entryTestOption" class="placeholder">Entry Test Status</label>
+        </div>
+
+        <div id="entryTestInputs">
+            <div class="input-container">
+                <input id="entryTestTotal" class="input" type="number"  placeholder=" ">
+                <label for="entryTestTotal" class="placeholder">Entry Test Total Marks</label>
+            </div>
+
+            <div class="input-container">
+                <input id="entryTestObtained" class="input" type="number" placeholder=" ">
+                <label for="entryTestObtained" class="placeholder">Entry Test Obtained Marks</label>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <select id="university" class="input" onchange="updateCampuses()">
+                <option value="">-- Select University --</option>
+                <option value="UET">UET</option>
+                <option value="FAST">FAST</option>
+                <option value="NUST">NUST</option>
+                <option value="AIR">AIR</option>
+                <option value="GKEY">GKEY</option>
+            </select>
+            <label for="university" class="placeholder">Select University</label>
+        </div>
+
+        <div class="input-container">
+            <select id="campus" class="input">
+                <option value="">-- Select Campus --</option>
+            </select>
+            <label for="campus" class="placeholder">Select Campus</label>
+        </div>
+
+        <button id="calculateAggregateBtn" class="submit">Check Aggregate</button>
+        <button id="reverseAggregateBtn" class="submit" style="display:none;">Check Required Entry Test Marks</button>
+
+        <h3 id="result" style="
+        color: #0dcaf0;
+        margin-top: 10px;
+        margin-left: 40px;
+        margin-right: 40px;"   ></h3>
+        <h4 id="eligibleDepartments" style="color: #0dcaf0; margin-left: 40px;"></h4>
+
+        <canvas id="resultCanvas" width="400" height="200" style="display:none;"></canvas>
+
+        <button id="downloadBtn" class="submit" style="display:none;">Download Result Image</button>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        const campusData = {
+            "UET": ["Lahore", "Taxila", "Faisalabad"],
+            "FAST": ["Lahore", "Islamabad", "Karachi"],
+            "NUST": ["H-12 Islamabad", "Rawalpindi", "Quetta"],
+            "AIR": ["Islamabad", "Multan"],
+            "GKEY": ["Lahore", "Peshawar"]
+        };
+
+        const universityCriteria = {
+            "UET": { "Engineering": 80, "CS": 75, "IT": 70 },
+            "FAST": { "Engineering": 75, "CS": 70, "IT": 65 },
+            "NUST": { "Engineering": 82, "CS": 78, "IT": 72 },
+            "AIR": { "Engineering": 77, "CS": 74, "IT": 68 },
+            "GKEY": { "Engineering": 70, "CS": 65, "IT": 60 }
+        };
+
+        const universityWeightages = {
+            "UET": { matric: 0.1, fsc: 0.4, entryTest: 0.5 },
+            "FAST": { matric: 0.1, fsc: 0.45, entryTest: 0.45 },
+            "NUST": { matric: 0.1, fsc: 0.35, entryTest: 0.55 },
+            "AIR": { matric: 0.1, fsc: 0.5, entryTest: 0.4 },
+            "GKEY": { matric: 0.1, fsc: 0.5, entryTest: 0.4 }
+        };
+
+        function updateCampuses() {
+            let university = document.getElementById("university").value;
+            let campusDropdown = document.getElementById("campus");
+
+            campusDropdown.innerHTML = '<option value="">-- Select Campus --</option>';
+
+            if (university in campusData) {
+                campusData[university].forEach(campus => {
+                    let option = document.createElement("option");
+                    option.value = campus;
+                    option.textContent = campus;
+                    campusDropdown.appendChild(option);
+                });
+            }
+        }
+
+        function toggleEntryTestInputs() {
+            let entryTestOption = document.getElementById("entryTestOption").value;
+            let entryTestInputs = document.getElementById("entryTestInputs");
+            let aggregateBtn = document.getElementById("calculateAggregateBtn");
+            let reverseAggregateBtn = document.getElementById("reverseAggregateBtn");
+
+            if (entryTestOption === "no") {
+                entryTestInputs.style.display = "none";
+                aggregateBtn.style.display = "none";
+                reverseAggregateBtn.style.display = "block";
+            } else {
+                entryTestInputs.style.display = "block";
+                aggregateBtn.style.display = "block";
+                reverseAggregateBtn.style.display = "none";
+            }
+        }
+
+        function validateInputs() {
+            let university = document.getElementById("university").value;
+            let matricObtained = parseFloat(document.getElementById("matricObtained").value);
+            let fscObtained = parseFloat(document.getElementById("fscObtained").value);
+            let entryTestObtained = document.getElementById("entryTestOption").value === "yes" 
+                ? parseFloat(document.getElementById("entryTestObtained").value) 
+                : null;
+
+            if (!university) {
+                return "Please select a university.";
+            }
+            if (isNaN(matricObtained) || matricObtained < 0 || matricObtained > matricTotal) {
+                return "Invalid Matric marks. Please enter correct Matric marks.";
+            }
+            if (isNaN(fscObtained) || fscObtained < 0 || fscObtained > fscTotal) {
+                return "Invalid FSc marks. Please enter correct FSC marks.";
+            }
+            if (entryTestObtained !== null && (isNaN(entryTestObtained) || entryTestObtained < 0 || entryTestObtained > entryTestTotal)) {
+                return "Invalid Entry Test marks. Please enter correct Entry Test marks";
+            }
+
+            return null;
+        }
+
+        function generateResultImage(aggregate, eligibleDepts) {
+            let canvas = document.getElementById("resultCanvas");
+            let ctx = canvas.getContext("2d");
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Background
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Text
+            ctx.font = '20px Arial';
+            ctx.fillStyle = '#000000';
+            ctx.textAlign = 'center';
+
+            ctx.fillText(`Your Aggregate: ${aggregate}%`, canvas.width / 2, canvas.height / 2 - 20);
+            
+            if (eligibleDepts.length > 0) {
+                ctx.fillText(`Eligible for: ${eligibleDepts.join(", ")}`, canvas.width / 2, canvas.height / 2 + 20);
+            } else {
+                ctx.fillText(`Not Eligible for Any Department`, canvas.width / 2 ,canvas.height/2+20)
+            }
+
+            document.getElementById('downloadBtn').style.display='block'
+        }
+
+        function downloadImage() {
+            let canvas = document.getElementById("resultCanvas");
+            canvas.toBlob(function(blob) {
+                let url = URL.createObjectURL(blob);
+                let link = document.createElement("a");
+                link.href = url;
+                link.download = "aggregate_result.jpeg";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url); // Clean up memory
+            }, "image/jpeg");
+        }
+
+        function calculate() {
+            let error = validateInputs();
+            if (error) {
+                document.getElementById("result").textContent = error;
+                return;
+            }
+
+            let university = document.getElementById("university").value;
+            let matricTotal = parseFloat(document.getElementById("matricTotal").value);
+            let matricObtained = parseFloat(document.getElementById("matricObtained").value);
+            let fscTotal = parseFloat(document.getElementById("fscTotal").value);
+            let fscObtained = parseFloat(document.getElementById("fscObtained").value);
+            let entryTestTotal = parseFloat(document.getElementById("entryTestTotal").value);
+            let entryTestObtained = parseFloat(document.getElementById("entryTestObtained").value);
+
+            let weightage = universityWeightages[university];
+
+            let aggregate = ((matricObtained / matricTotal) * 100 * weightage.matric) +
+                            ((fscObtained / fscTotal) * 100 * weightage.fsc) +
+                            ((entryTestObtained / entryTestTotal) * 100 * weightage.entryTest);
+
+            let eligibleDepts = [];
+            for (let dept in universityCriteria[university]) {
+                if (aggregate >= universityCriteria[university][dept]) {
+                    eligibleDepts.push(dept);
+                }
+            }
+
+            document.getElementById("result").textContent = `Your Aggregate: ${aggregate.toFixed(2)}%`;
+            document.getElementById("eligibleDepartments").textContent = eligibleDepts.length > 0 
+                ? `Eligible for: ${eligibleDepts.join(", ")}`
+                : "You are not eligible for any department.";
+
+            generateResultImage(aggregate.toFixed(2), eligibleDepts);
+        }
+
+        function reverseAggregate() {
+            let university = document.getElementById("university").value;
+            let matricTotal = parseFloat(document.getElementById("matricTotal").value);
+            let matricObtained = parseFloat(document.getElementById("matricObtained").value);
+            let fscTotal = parseFloat(document.getElementById("fscTotal").value);
+            let fscObtained = parseFloat(document.getElementById("fscObtained").value);
+            let entryTestTotal = parseFloat(document.getElementById("entryTestTotal").value);
+
+            let error = validateInputs();
+            if (error && error !== `Invalid Entry Test marks. Please enter marks between 0 and ${entryTestTotal}.`) {
+                document.getElementById("result").textContent = error;
+                return;
+            }
+
+            let weightage = universityWeightages[university];
+
+            let requiredMarks = {};
+            for (let dept in universityCriteria[university]) {
+                let minRequired = universityCriteria[university][dept];
+                
+                // Validate input values to prevent NaN
+                if (matricTotal === 0 || fscTotal === 0 || weightage.matric === 0 || weightage.fsc === 0 || weightage.entryTest === 0) {
+                    requiredMarks[dept] = "N/A";
+                    continue;
+                }
+
+                let matricPercentage = (matricObtained / matricTotal) * 100;
+                let fscPercentage = (fscObtained / fscTotal) * 100;
+
+                let requiredEntryTest = (minRequired - (matricPercentage * weightage.matric) - (fscPercentage * weightage.fsc)) / weightage.entryTest;
+                
+                // Ensure the result is a valid number and not negative
+                requiredMarks[dept] = requiredEntryTest > 0 ? requiredEntryTest.toFixed(2) : "0.00";
+            }
+
+            let resultText = "Required Entry Test Marks for Eligibility: ";
+            for (let dept in requiredMarks) {
+                resultText += `${dept}: ${requiredMarks[dept]}%, `;
+            }
+
+            document.getElementById("result").textContent = resultText.slice(0, -2);
+        }
+
+        // Loading Animation Function
+        function showLoader(callback) {
+            const loaderOverlay = document.getElementById('loaderOverlay');
+            loaderOverlay.style.display = 'flex';
+
+            // Simulate loading for 4 seconds
+            setTimeout(() => {
+                loaderOverlay.style.display = 'none';
+                if (callback) callback();
+            }, 3000);
+        }
+
+        // Modify existing button click handlers
+        document.getElementById('calculateAggregateBtn').addEventListener('click', function(e) {
+            showLoader(() => {
+                calculate(); // Original calculate function
+            });
+        });
+
+        document.getElementById('reverseAggregateBtn').addEventListener('click', function(e) {
+            showLoader(() => {
+                reverseAggregate(); // Original reverseAggregate function
+            });
+        });
+
+        document.getElementById('downloadBtn').addEventListener('click', function(e) {
+            showLoader(() => {
+                downloadImage(); // Original downloadImage function
+            });
+        });
+    </script>
+    <script>
+        function createBoxes() {
+            const container = document.getElementById('backgroundShapes');
+            const boxCount = 20;
+
+            for (let i = 0; i < boxCount; i++) {
+                const box = document.createElement('div');
+                box.classList.add('box');
+                
+                // Randomize box properties
+                box.style.width = `${Math.random() * 200 + 50}px`;
+                box.style.height = `${Math.random() * 200 + 50}px`;
+                box.style.top = `${Math.random() * 100}%`;
+                box.style.left = `${Math.random() * 100}%`;
+                box.style.borderColor = `rgba(255, 255, 255, ${Math.random() * 0.2})`;
+                
+                container.appendChild(box);
+            }
+        }
+
+        // Create boxes when the page loads
+        window.addEventListener('load', createBoxes);
+    </script>
+</body>
+</html>
